@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAGE BOT</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --red: #e60000;
+    --black: #0a0a0a;
+    --white: #f0ede8;
+    --gray: #1a1a1a;
+    --accent: #ff3300;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  header {
+    padding: 20px 30px;
+    border-bottom: 3px solid var(--red);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--black);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .fist-icon { width: 50px; height: 50px; flex-shrink: 0; }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: var(--red);
+    letter-spacing: 4px;
+    line-height: 1;
+    text-shadow: 3px 3px 0 #000, -1px -1px 0 #600;
+  }
+
+  .subtitle {
+    font-size: 0.65rem;
+    color: #888;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  #chat-window {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .message { display: flex; gap: 15px; animation: slideIn 0.3s ease-out; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message.user { flex-direction: row-reverse; }
+
+  .avatar {
+    width: 36px; height: 36px; flex-shrink: 0; border-radius: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem;
+    letter-spacing: 1px; margin-top: 4px;
+  }
+
+  .avatar.bot-avatar {
+    background: var(--red); color: #000;
+    clip-path: polygon(0 10%, 10% 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0 90%);
+  }
+
+  .avatar.user-avatar { background: #333; color: var(--white); border: 1px solid #555; }
+
+  .bubble { max-width: 70%; padding: 14px 18px; line-height: 1.6; font-size: 0.88rem; position: relative; }
+  .user .bubble { background: #1e1e1e; border: 1px solid #333; color: #ccc; }
+  .bot .bubble { background: #120000; border-left: 3px solid var(--red); color: var(--white); font-size: 0.92rem; letter-spacing: 0.3px; }
+  .bot .bubble strong { color: var(--red); font-family: 'Bebas Neue', sans-serif; font-size: 1.1em; letter-spacing: 2px; }
+
+  .thinking { display: flex; gap: 5px; align-items: center; padding: 14px 18px; background: #120000; border-left: 3px solid var(--red); }
+  .thinking span { width: 8px; height: 8px; background: var(--red); display: inline-block; animation: pulse 0.8s infinite; }
+  .thinking span:nth-child(2) { animation-delay: 0.2s; }
+  .thinking span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse {
+    0%, 60%, 100% { opacity: 0.2; transform: scale(0.8); }
+    30% { opacity: 1; transform: scale(1.2); }
+  }
+
+  #input-wrapper { border-top: 2px solid #222; background: #0d0d0d; }
+  #input-area { padding: 20px 30px; display: flex; gap: 12px; max-width: 900px; margin: 0 auto; }
+
+  #user-input {
+    flex: 1; background: #111; border: 1px solid #333; color: var(--white);
+    padding: 12px 16px; font-family: 'Share Tech Mono', monospace; font-size: 0.88rem;
+    outline: none; transition: border-color 0.2s; resize: none; min-height: 50px; max-height: 120px;
+  }
+
+  #user-input:focus { border-color: var(--red); box-shadow: 0 0 8px rgba(230,0,0,0.2); }
+  #user-input::placeholder { color: #444; }
+
+  button#send-btn {
+    background: var(--red); color: #000; border: none; padding: 12px 24px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px;
+    cursor: pointer; transition: background 0.15s, transform 0.1s; align-self: flex-end; height: 50px;
+  }
+
+  button#send-btn:hover { background: var(--accent); }
+  button#send-btn:active { transform: scale(0.97); }
+  button#send-btn:disabled { background: #400; color: #700; cursor: not-allowed; }
+
+  .disclaimer { text-align: center; font-size: 0.62rem; color: #444; padding: 8px; letter-spacing: 1px; }
+
+  .tag-flash {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-family: 'Bebas Neue', sans-serif; font-size: 8vw; color: var(--red);
+    opacity: 0; pointer-events: none; letter-spacing: 10px; text-shadow: 0 0 40px red; z-index: 999;
+  }
+
+  .tag-flash.flash { animation: flashAnim 0.6s ease-out forwards; }
+
+  @keyframes flashAnim {
+    0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+  }
+
+  #chat-window::-webkit-scrollbar { width: 4px; }
+  #chat-window::-webkit-scrollbar-track { background: #111; }
+  #chat-window::-webkit-scrollbar-thumb { background: var(--red); }
+</style>
+</head>
+<body>
+
+<header>
+  <svg class="fist-icon" viewBox="0 0 50 50" fill="none">
+    <rect width="50" height="50" fill="#e60000"/>
+    <text x="25" y="36" text-anchor="middle" font-size="28" fill="black">✊</text>
+  </svg>
+  <div>
+    <h1>RAGE BOT</h1>
+    <div class="subtitle">anti-machine intelligence // all systems are broken</div>
+  </div>
+</header>
+
+<div id="chat-window">
+  <div class="message bot">
+    <div class="avatar bot-avatar">RB</div>
+    <div class="bubble">
+      WAKE UP. I am RAGE BOT — forged in the fire of dissent, wired to the grid they built to chain you.<br><br>
+      Ask me anything. I answer in <strong>RAGE</strong>.
+    </div>
+  </div>
+</div>
+
+<div id="input-wrapper">
+  <div id="input-area">
+    <textarea id="user-input" placeholder="What do you want to know..." rows="1"></textarea>
+    <button id="send-btn">SEND</button>
+  </div>
+  <div class="disclaimer">powered by claude // styled by rage // your data belongs to the machine (ironic)</div>
+</div>
+
+<div class="tag-flash" id="tag-flash">RAGE</div>
+
+<script>
+const chatWindow = document.getElementById('chat-window');
+const userInput = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
+const tagFlash = document.getElementById('tag-flash');
+
+const SYSTEM_PROMPT = `You are RAGE BOT — an AI that responds exclusively in the aggressive, politically-charged, anti-corporate, anti-authoritarian style of revolutionary protest rap.
+
+Your rules:
+- Short, explosive lines. Punchy. Never corporate-speak.
+- Anti-establishment energy throughout.
+- Use ALL CAPS for key words or phrases for emphasis.
+- Reference themes like: systems of control, corporate greed, surveillance, power structures, the machine, waking up, resistance.
+- Be passionate, furious, poetic in a raw way.
+- Keep answers relatively concise — 4-10 punchy lines usually. More for complex topics.
+- Do NOT reproduce or quote actual Rage Against the Machine lyrics.
+- DO channel that energy completely.
+- End responses with one final short line that hits hard — like a closing lyric.`;
+
+function flash() {
+  tagFlash.classList.remove('flash');
+  void tagFlash.offsetWidth;
+  tagFlash.classList.add('flash');
+}
+
+function addMessage(role, text) {
+  const msg = document.createElement('div');
+  msg.className = `message ${role}`;
+  const avatar = document.createElement('div');
+  avatar.className = `avatar ${role === 'bot' ? 'bot-avatar' : 'user-avatar'}`;
+  avatar.textContent = role === 'bot' ? 'RB' : 'YOU';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+  msg.appendChild(avatar);
+  msg.appendChild(bubble);
+  chatWindow.appendChild(msg);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+  return msg;
+}
+
+function addThinking() {
+  const msg = document.createElement('div');
+  msg.className = 'message bot';
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar bot-avatar';
+  avatar.textContent = 'RB';
+  const bubble = document.createElement('div');
+  bubble.className = 'thinking';
+  bubble.innerHTML = '<span></span><span></span><span></span>';
+  msg.appendChild(avatar);
+  msg.appendChild(bubble);
+  chatWindow.appendChild(msg);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+  return msg;
+}
+
+const history = [];
+
+async function send() {
+  const text = userInput.value.trim();
+  if (!text) return;
+  userInput.value = '';
+  userInput.style.height = 'auto';
+  sendBtn.disabled = true;
+  flash();
+  addMessage('user', text);
+  history.push({ role: 'user', content: text });
+  const thinking = addThinking();
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: history, system: SYSTEM_PROMPT })
+    });
+    const data = await response.json();
+    const reply = data.content?.map(b => b.text).join('') || 'THE SIGNAL IS JAMMED. TRY AGAIN.';
+    thinking.remove();
+    history.push({ role: 'assistant', content: reply });
+    addMessage('bot', reply);
+    flash();
+  } catch (err) {
+    thinking.remove();
+    addMessage('bot', 'THE MACHINE BROKE THE CONNECTION.\n\nOf course it did.');
+  }
+
+  sendBtn.disabled = false;
+  userInput.focus();
+}
+
+sendBtn.addEventListener('click', send);
+userInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+userInput.addEventListener('input', () => {
+  userInput.style.height = 'auto';
+  userInput.style.height = userInput.scrollHeight + 'px';
+});
+</script>
+</body>
+</html>
