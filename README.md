@@ -1,0 +1,2 @@
+# Ragebot
+Rage bot
