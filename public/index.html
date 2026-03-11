@@ -1,302 +1,878 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RAGE BOT</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COMPANYFILES.ZIP &mdash; UNAUTHORIZED ACCESS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #00ff41;
+      --dim-green: #00b32c;
+      --darker-green: #004d12;
+      --red: #ff2a2a;
+      --yellow: #ffd700;
+      --bg: #030a04;
+      --bg2: #060f07;
+      --paper: #f5f0e8;
+      --ink: #1a1a0e;
+      --stamp-red: #cc1a1a;
+    }
 
-  :root {
-    --red: #e60000;
-    --black: #0a0a0a;
-    --white: #f0ede8;
-    --gray: #1a1a1a;
-    --accent: #ff3300;
-  }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-  body {
-    background: var(--black);
-    color: var(--white);
-    font-family: 'Share Tech Mono', monospace;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
-  }
+    /* CRT scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.15) 2px,
-      rgba(0,0,0,0.15) 4px
-    );
-    pointer-events: none;
-    z-index: 1000;
-  }
+    /* CRT flicker */
+    @keyframes flicker {
+      0%, 97%, 100% { opacity: 1; }
+      98% { opacity: 0.92; }
+      99% { opacity: 0.97; }
+    }
+    body { animation: flicker 8s infinite; }
 
-  header {
-    padding: 20px 30px;
-    border-bottom: 3px solid var(--red);
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    background: var(--black);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
+    /* Noise texture */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9998;
+    }
 
-  .fist-icon { width: 50px; height: 50px; flex-shrink: 0; }
+    header {
+      border-bottom: 1px solid var(--dim-green);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg2);
+    }
 
-  h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    color: var(--red);
-    letter-spacing: 4px;
-    line-height: 1;
-    text-shadow: 3px 3px 0 #000, -1px -1px 0 #600;
-  }
+    .logo {
+      font-family: 'VT323', monospace;
+      font-size: 28px;
+      color: var(--green);
+      text-shadow: 0 0 10px var(--green);
+      letter-spacing: 2px;
+    }
 
-  .subtitle {
-    font-size: 0.65rem;
-    color: #888;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-top: 4px;
-  }
+    .blink { animation: blink 1.2s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
 
-  #chat-window {
-    flex: 1;
-    overflow-y: auto;
-    padding: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 900px;
-    width: 100%;
-    margin: 0 auto;
-  }
+    .status-bar {
+      font-size: 11px;
+      color: var(--dim-green);
+      text-align: right;
+      line-height: 1.6;
+    }
 
-  .message { display: flex; gap: 15px; animation: slideIn 0.3s ease-out; }
+    .status-bar .alert { color: var(--red); }
 
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+    .terminal-strip {
+      background: #000;
+      border-bottom: 1px solid var(--darker-green);
+      padding: 6px 24px;
+      font-size: 12px;
+      color: var(--dim-green);
+      white-space: nowrap;
+      overflow: hidden;
+    }
 
-  .message.user { flex-direction: row-reverse; }
+    .scroll-text {
+      display: inline-block;
+      animation: scroll-left 40s linear infinite;
+    }
 
-  .avatar {
-    width: 36px; height: 36px; flex-shrink: 0; border-radius: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem;
-    letter-spacing: 1px; margin-top: 4px;
-  }
+    @keyframes scroll-left {
+      from { transform: translateX(100vw); }
+      to { transform: translateX(-100%); }
+    }
 
-  .avatar.bot-avatar {
-    background: var(--red); color: #000;
-    clip-path: polygon(0 10%, 10% 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0 90%);
-  }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
 
-  .avatar.user-avatar { background: #333; color: var(--white); border: 1px solid #555; }
+    /* Warning banner */
+    .warning-banner {
+      border: 2px solid var(--red);
+      padding: 16px 24px;
+      margin-bottom: 32px;
+      background: rgba(255,42,42,0.05);
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
 
-  .bubble { max-width: 70%; padding: 14px 18px; line-height: 1.6; font-size: 0.88rem; position: relative; }
-  .user .bubble { background: #1e1e1e; border: 1px solid #333; color: #ccc; }
-  .bot .bubble { background: #120000; border-left: 3px solid var(--red); color: var(--white); font-size: 0.92rem; letter-spacing: 0.3px; }
-  .bot .bubble strong { color: var(--red); font-family: 'Bebas Neue', sans-serif; font-size: 1.1em; letter-spacing: 2px; }
+    .warning-icon {
+      font-family: 'VT323', monospace;
+      font-size: 48px;
+      color: var(--red);
+      line-height: 1;
+      text-shadow: 0 0 12px var(--red);
+      flex-shrink: 0;
+    }
 
-  .thinking { display: flex; gap: 5px; align-items: center; padding: 14px 18px; background: #120000; border-left: 3px solid var(--red); }
-  .thinking span { width: 8px; height: 8px; background: var(--red); display: inline-block; animation: pulse 0.8s infinite; }
-  .thinking span:nth-child(2) { animation-delay: 0.2s; }
-  .thinking span:nth-child(3) { animation-delay: 0.4s; }
+    .warning-text h2 {
+      font-family: 'VT323', monospace;
+      font-size: 26px;
+      color: var(--red);
+      margin-bottom: 4px;
+      text-shadow: 0 0 8px var(--red);
+    }
 
-  @keyframes pulse {
-    0%, 60%, 100% { opacity: 0.2; transform: scale(0.8); }
-    30% { opacity: 1; transform: scale(1.2); }
-  }
+    .warning-text p {
+      font-size: 12px;
+      color: #ff8888;
+      line-height: 1.6;
+    }
 
-  #input-wrapper { border-top: 2px solid #222; background: #0d0d0d; }
-  #input-area { padding: 20px 30px; display: flex; gap: 12px; max-width: 900px; margin: 0 auto; }
+    /* Section headers */
+    .section-header {
+      font-family: 'VT323', monospace;
+      font-size: 22px;
+      color: var(--yellow);
+      text-shadow: 0 0 8px rgba(255,215,0,0.5);
+      border-bottom: 1px dashed var(--darker-green);
+      padding-bottom: 6px;
+      margin-bottom: 16px;
+      letter-spacing: 2px;
+    }
 
-  #user-input {
-    flex: 1; background: #111; border: 1px solid #333; color: var(--white);
-    padding: 12px 16px; font-family: 'Share Tech Mono', monospace; font-size: 0.88rem;
-    outline: none; transition: border-color 0.2s; resize: none; min-height: 50px; max-height: 120px;
-  }
+    /* File grid */
+    .file-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
 
-  #user-input:focus { border-color: var(--red); box-shadow: 0 0 8px rgba(230,0,0,0.2); }
-  #user-input::placeholder { color: #444; }
+    .file-card {
+      border: 1px solid var(--darker-green);
+      padding: 16px;
+      background: var(--bg2);
+      cursor: default;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
 
-  button#send-btn {
-    background: var(--red); color: #000; border: none; padding: 12px 24px;
-    font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px;
-    cursor: pointer; transition: background 0.15s, transform 0.1s; align-self: flex-end; height: 50px;
-  }
+    .file-card:hover {
+      border-color: var(--dim-green);
+      background: #0a1a0c;
+    }
 
-  button#send-btn:hover { background: var(--accent); }
-  button#send-btn:active { transform: scale(0.97); }
-  button#send-btn:disabled { background: #400; color: #700; cursor: not-allowed; }
+    .file-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0,255,65,0.04), transparent);
+      transition: left 0.5s;
+    }
 
-  .disclaimer { text-align: center; font-size: 0.62rem; color: #444; padding: 8px; letter-spacing: 1px; }
+    .file-card:hover::before { left: 150%; }
 
-  .tag-flash {
-    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    font-family: 'Bebas Neue', sans-serif; font-size: 8vw; color: var(--red);
-    opacity: 0; pointer-events: none; letter-spacing: 10px; text-shadow: 0 0 40px red; z-index: 999;
-  }
+    .file-icon {
+      font-size: 11px;
+      color: var(--dim-green);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-  .tag-flash.flash { animation: flashAnim 0.6s ease-out forwards; }
+    .file-icon .ext {
+      background: var(--darker-green);
+      color: var(--green);
+      padding: 1px 6px;
+      font-size: 10px;
+      border-radius: 2px;
+    }
 
-  @keyframes flashAnim {
-    0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.2); }
-    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-  }
+    .file-icon .ext.redacted { background: #3a0000; color: var(--red); }
+    .file-icon .ext.classified { background: #2a2000; color: var(--yellow); }
 
-  #chat-window::-webkit-scrollbar { width: 4px; }
-  #chat-window::-webkit-scrollbar-track { background: #111; }
-  #chat-window::-webkit-scrollbar-thumb { background: var(--red); }
-</style>
+    .file-name {
+      font-size: 14px;
+      color: var(--green);
+      margin-bottom: 6px;
+      word-break: break-all;
+    }
+
+    .file-desc {
+      font-size: 11px;
+      color: #4a8a50;
+      line-height: 1.5;
+    }
+
+    .file-meta {
+      margin-top: 12px;
+      font-size: 10px;
+      color: #2d5c33;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* The actual "documents" - paper style */
+    .document-section { margin-bottom: 40px; }
+
+    .doc-paper {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Courier Prime', monospace;
+      padding: 40px 48px;
+      margin-bottom: 20px;
+      position: relative;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5), inset 0 0 60px rgba(0,0,0,0.05);
+      transform: rotate(-0.3deg);
+    }
+
+    .doc-paper:nth-child(even) { transform: rotate(0.4deg); }
+
+    .doc-paper::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      right: 0; height: 6px;
+      background: repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(0,0,0,0.03) 20px, rgba(0,0,0,0.03) 21px);
+    }
+
+    .doc-header {
+      text-align: center;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+
+    .doc-company {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    .doc-tagline {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #555;
+      margin-top: 2px;
+    }
+
+    .doc-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-top: 12px;
+      letter-spacing: 1px;
+    }
+
+    .doc-meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #555;
+      margin-top: 6px;
+    }
+
+    .doc-body {
+      font-size: 13px;
+      line-height: 1.9;
+    }
+
+    .doc-body p { margin-bottom: 12px; }
+
+    .redacted-word {
+      background: var(--ink);
+      color: transparent;
+      padding: 0 4px;
+      user-select: none;
+      border-radius: 1px;
+      cursor: default;
+    }
+
+    .redacted-word:hover { background: #333; }
+
+    .stamp {
+      position: absolute;
+      border: 3px solid var(--stamp-red);
+      color: var(--stamp-red);
+      font-family: 'VT323', monospace;
+      font-size: 32px;
+      padding: 4px 12px;
+      letter-spacing: 4px;
+      transform: rotate(-18deg);
+      opacity: 0.75;
+      pointer-events: none;
+    }
+
+    .stamp-top-right { top: 30px; right: 30px; }
+    .stamp-bottom-left { bottom: 40px; left: 30px; transform: rotate(12deg); }
+
+    .doc-signature {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #ccc;
+      font-size: 11px;
+      color: #666;
+    }
+
+    .sig-line {
+      border-bottom: 1px solid var(--ink);
+      width: 180px;
+      height: 30px;
+      margin: 8px 0 4px;
+    }
+
+    /* Annotation marks */
+    .annotation {
+      background: rgba(255,230,0,0.3);
+      border-left: 3px solid #cc9900;
+      padding: 2px 6px;
+      font-style: italic;
+      color: #5a3e00;
+      font-size: 11px;
+      display: inline;
+    }
+
+    /* Image placeholder docs */
+    .photo-evidence {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .photo-box {
+      aspect-ratio: 4/3;
+      background: #ddd;
+      border: 1px solid #aaa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      color: #666;
+      text-align: center;
+      padding: 8px;
+      position: relative;
+    }
+
+    .photo-box::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: 4px;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 9px;
+      color: #444;
+      background: rgba(255,255,255,0.7);
+      padding: 2px;
+    }
+
+    /* Org chart */
+    .org-chart { font-size: 11px; color: var(--ink); margin: 16px 0; }
+
+    .org-node {
+      border: 1px solid var(--ink);
+      padding: 6px 10px;
+      display: inline-block;
+      margin: 4px;
+      font-size: 11px;
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .org-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 8px 0;
+      flex-wrap: wrap;
+    }
+
+    .org-connector { text-align: center; color: #555; font-size: 16px; line-height: 1; }
+
+    /* Sidebar log */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .activity-log {
+      border: 1px solid var(--darker-green);
+      background: var(--bg2);
+    }
+
+    .log-header {
+      background: var(--darker-green);
+      padding: 8px 12px;
+      color: var(--green);
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      letter-spacing: 2px;
+    }
+
+    .log-entries {
+      padding: 12px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      padding: 8px 0;
+      border-bottom: 1px solid #0a1a0c;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .log-entry:last-child { border-bottom: none; }
+
+    .log-time { color: var(--dim-green); }
+    .log-user { color: var(--yellow); }
+    .log-action { color: #6ab870; }
+    .log-suspicious { color: var(--red); }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--darker-green);
+      padding: 16px 24px;
+      margin-top: 40px;
+      font-size: 11px;
+      color: var(--darker-green);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .glitch { position: relative; }
+
+    .glitch::before, .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0;
+      opacity: 0;
+    }
+
+    @keyframes glitch-anim {
+      0%, 90%, 100% { opacity: 0; clip-path: none; }
+      92% { opacity: 0.8; clip-path: inset(20% 0 60% 0); transform: translate(-3px, 0); color: #ff0000; }
+      94% { opacity: 0.8; clip-path: inset(60% 0 10% 0); transform: translate(3px, 0); color: #0000ff; }
+      96% { opacity: 0; }
+    }
+
+    .glitch::before { animation: glitch-anim 7s infinite; }
+    .glitch::after { animation: glitch-anim 7s infinite 0.1s; }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--darker-green);
+      margin: 8px 0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      margin-right: 4px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .tag-red { background: #3a0000; color: var(--red); border: 1px solid var(--red); }
+    .tag-yellow { background: #2a2000; color: var(--yellow); border: 1px solid var(--yellow); }
+    .tag-green { background: var(--darker-green); color: var(--green); border: 1px solid var(--dim-green); }
+
+    .cursor-blink {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: var(--green);
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+      margin-left: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .two-col { grid-template-columns: 1fr; }
+      .photo-evidence { grid-template-columns: repeat(2, 1fr); }
+      .doc-paper { padding: 24px; }
+    }
+  </style>
 </head>
 <body>
 
 <header>
-  <svg class="fist-icon" viewBox="0 0 50 50" fill="none">
-    <rect width="50" height="50" fill="#e60000"/>
-    <text x="25" y="36" text-anchor="middle" font-size="28" fill="black">✊</text>
-  </svg>
-  <div>
-    <h1>RAGE BOT</h1>
-    <div class="subtitle">anti-machine intelligence // all systems are broken</div>
+  <div class="logo glitch" data-text="COMPANYFILES.ZIP">COMPANYFILES.ZIP<span class="blink">_</span></div>
+  <div class="status-bar">
+    <div>MIRROR NODE: 7 OF 7 ACTIVE</div>
+    <div>FILES INDEXED: 14,882 &nbsp;|&nbsp; <span class="alert">MISSING: 3,447</span></div>
+    <div>LAST SYNC: 2024-03-??-??:??:??</div>
   </div>
 </header>
 
-<div id="chat-window">
-  <div class="message bot">
-    <div class="avatar bot-avatar">RB</div>
-    <div class="bubble">
-      WAKE UP. I am RAGE BOT — forged in the fire of dissent, wired to the grid they built to chain you.<br><br>
-      Ask me anything. I answer in <strong>RAGE</strong>.
+<div class="terminal-strip">
+  <span class="scroll-text">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOTICE: THIS ARCHIVE IS PROVIDED AS-IS. OPTEREX GLOBAL SOLUTIONS DENIES THE EXISTENCE OF THIS CONTENT. &nbsp;&#9888;&nbsp; FILE INTEGRITY: DEGRADED &nbsp;&#9888;&nbsp; IF YOU ARE READING THIS, DO NOT CONTACT US. WE WILL CONTACT YOU. &nbsp;&#9888;&nbsp; EMPLOYEE WELLNESS PROGRAM PARTICIPATION IS MANDATORY AND JOYFUL &nbsp;&#9888;&nbsp; FISCAL YEAR Q3 MEMO #47 HAS BEEN RETROACTIVELY UNWRITTEN &nbsp;&#9888;&nbsp; THE CAFETERIA REMAINS OPEN TUESDAY THROUGH TUESDAY &nbsp;&#9888;&nbsp; DO NOT DISCUSS THE PIGEON &nbsp;&#9888;&nbsp; ALL FORMER EMPLOYEES ARE FORMER BY CHOICE &nbsp;&#9888;&nbsp;
+  </span>
+</div>
+
+<div class="container">
+
+  <!-- Warning Banner -->
+  <div class="warning-banner">
+    <div class="warning-icon">&#9888;</div>
+    <div class="warning-text">
+      <h2>UNAUTHORIZED ARCHIVE &mdash; OPTEREX GLOBAL SOLUTIONS INC.</h2>
+      <p>
+        These files were recovered from a decommissioned server farm in an unincorporated territory outside Reno, Nevada. The server was registered to a shell company called "Definitely Just A Server Farm LLC."
+        Opterex Global Solutions has issued 14 cease-and-desist orders, 3 counter-cease-and-desist orders, and one strongly-worded birthday card in response to this publication.
+        All documents are presented unaltered, except where they were altered. <span class="tag tag-red">DO NOT PRINT</span> <span class="tag tag-yellow">DO NOT FORWARD</span> <span class="tag tag-green">READING IS FINE (PROBABLY)</span>
+      </p>
     </div>
   </div>
-</div>
 
-<div id="input-wrapper">
-  <div id="input-area">
-    <textarea id="user-input" placeholder="What do you want to know..." rows="1"></textarea>
-    <button id="send-btn">SEND</button>
+  <!-- File Index -->
+  <div class="section-header">&#128193; FILE INDEX &mdash; PARTIAL RECOVERY</div>
+
+  <div class="file-grid">
+    <div class="file-card">
+      <div class="file-icon"><span class="ext classified">PDF</span> INTERNAL MEMO</div>
+      <div class="file-name">Q3_synergy_mandate_FINAL_v7_USE_THIS_ONE.pdf</div>
+      <div class="file-desc">Company-wide directive regarding mandatory enthusiasm levels. Includes new protocol for detecting "insufficient smiling."</div>
+      <div class="file-meta"><span>Modified: ??/??/????</span><span>3.2 MB (of 3.2 MB missing)</span></div>
+    </div>
+    <div class="file-card">
+      <div class="file-icon"><span class="ext redacted">XLSX</span> FINANCIALS</div>
+      <div class="file-name">revenue_projections_[REDACTED]_Q4.xlsx</div>
+      <div class="file-desc">Spreadsheet containing 847 columns, 3 of which contain numbers. The rest contain what appear to be the lyrics to "Mambo No. 5" repeated in descending font sizes.</div>
+      <div class="file-meta"><span>Author: K. [REDACTED]</span><span>47.1 MB</span></div>
+    </div>
+    <div class="file-card">
+      <div class="file-icon"><span class="ext classified">DOCX</span> POLICY</div>
+      <div class="file-name">new_employee_orientation_UPDATED_2019_2021_2019.docx</div>
+      <div class="file-desc">Orientation handbook. Chapter 7 ("The Basement") has been replaced with a photo of a golden retriever. This is unexplained.</div>
+      <div class="file-meta"><span>Classification: RESTRICTED</span><span>1.1 MB</span></div>
+    </div>
+    <div class="file-card">
+      <div class="file-icon"><span class="ext redacted">MP4</span> SURVEILLANCE</div>
+      <div class="file-name">lobby_cam_03_tuesday_night.mp4</div>
+      <div class="file-desc">17 hours of footage. Hours 1&ndash;16: empty lobby. Hour 17: [CORRUPTED]. IT notes say the corruption "arrived from within the file."</div>
+      <div class="file-meta"><span>&#128308; CORRUPTED</span><span>2.1 GB</span></div>
+    </div>
+    <div class="file-card">
+      <div class="file-icon"><span class="ext classified">TXT</span> CORRESPONDENCE</div>
+      <div class="file-name">email_thread_re_re_re_re_the_pigeon.txt</div>
+      <div class="file-desc">487-message email chain. Subject escalates from "Has anyone seen a pigeon" to "GLOBAL INCIDENT TIER 1 &mdash; THE PIGEON." Final email is blank except for coordinates.</div>
+      <div class="file-meta"><span>Participants: 34 &rarr; 1</span><span>891 KB</span></div>
+    </div>
+    <div class="file-card">
+      <div class="file-icon"><span class="ext redacted">PDF</span> LEGAL</div>
+      <div class="file-name">settlement_agreement_CONFIDENTIAL_do_not_name.pdf</div>
+      <div class="file-desc">Settlement with a party referred to only as "The Party." Terms include a provision that Opterex must "never again attempt to trademark a sound that occurs naturally in humans."</div>
+      <div class="file-meta"><span>Legal hold: ACTIVE</span><span>244 KB</span></div>
+    </div>
+    <div class="file-card">
+      <div class="file-icon"><span class="ext classified">PPT</span> STRATEGY</div>
+      <div class="file-name">five_year_plan_deck_EYES_ONLY.pptx</div>
+      <div class="file-desc">82-slide deck. Slides 1&ndash;81: placeholder text reading "VISION GOES HERE." Slide 82: a photograph of a hole in the ground with the caption "Phase 1 Complete."</div>
+      <div class="file-meta"><span>Presenter: CEO (acting)</span><span>18.8 MB</span></div>
+    </div>
+    <div class="file-card">
+      <div class="file-icon"><span class="ext redacted">???</span> UNKNOWN</div>
+      <div class="file-name">do_not_open_this.do_not_open_this</div>
+      <div class="file-desc">File type unrecognized. File size changes each time it is accessed. Three people have opened it. Two no longer work here. One claims not to remember opening it.</div>
+      <div class="file-meta"><span>&#9888; QUARANTINED</span><span>&infin; KB</span></div>
+    </div>
   </div>
-  <div class="disclaimer">powered by claude // styled by rage // your data belongs to the machine (ironic)</div>
+
+  <!-- Two-column: Documents + Log -->
+  <div class="two-col">
+    <div class="document-section">
+      <div class="section-header">&#128196; RECOVERED DOCUMENTS</div>
+
+      <!-- Memo 1: Mandatory Happiness Initiative -->
+      <div class="doc-paper">
+        <div class="stamp stamp-top-right">LEAKED</div>
+        <div class="doc-header">
+          <div class="doc-company">OPTEREX GLOBAL SOLUTIONS</div>
+          <div class="doc-tagline">DELIVERING EXCELLENCE THROUGH EXCELLENCE&trade; &nbsp;|&nbsp; EST. SOMETIME BEFORE NOW</div>
+          <div class="doc-title">INTERNAL MEMORANDUM &mdash; MANDATORY HAPPINESS INITIATIVE</div>
+          <div class="doc-meta-row">
+            <span>TO: All Personnel (incl. The Ones Who Don't Reply)</span>
+            <span>DATE: [See Calendar]</span>
+          </div>
+          <div class="doc-meta-row">
+            <span>FROM: Office of Morale Assurance &amp; Vitality</span>
+            <span>REF: OGS-MHI-2024-009</span>
+          </div>
+        </div>
+        <div class="doc-body">
+          <p>Effective immediately, all employees are required to maintain a Happiness Compliance Score (HCS) of no less than <strong>7.4 out of 10</strong> during all core business hours (06:00&ndash;23:30). Scores will be assessed via the new <span class="annotation">what new cameras?? &mdash; M.L.</span> Ambient Sentiment Monitoring System (ASMS) installed in all common areas, restrooms, and <span class="redacted-word">the crawl space between floors 3 and 4</span>.</p>
+          <p>Employees falling below the required HCS threshold will receive a <strong>Wellness Nudge</strong> &mdash; a brief 30-minute session with a Positivity Liaison in a small beige room with no windows. This is not disciplinary. It is simply mandatory and does not appear on your record unless it appears on your record.</p>
+          <p>Per <span class="redacted-word">the incident</span> last quarter, smiling is no longer optional in the following zones: the elevator bank, the "Innovation Hub" (formerly the supply closet), and any area within 12 feet of the <span class="redacted-word">CEO's emotional support aquarium</span>. Staff displaying "resting neutral face" in these zones will be issued a Warmth Improvement Plan (WIP).</p>
+          <p>Please note: <em>forced smiling is discouraged</em>, as it has been shown to reduce authentic engagement metrics by up to 34%. You are expected to smile genuinely. Training materials on how to feel genuine feelings are available on the intranet under <strong>Resources &gt; Feelings &gt; Approved</strong>.</p>
+          <p>We are so excited about this. We hope you are too. Your enthusiasm has already been logged.</p>
+        </div>
+        <div class="doc-signature">
+          <div>Authorized by:</div>
+          <div class="sig-line"></div>
+          <div><em>D. <span class="redacted-word">Thornwick</span>, Chief People Experience Officer (Interim)</em></div>
+        </div>
+      </div>
+
+      <!-- Memo 2: The Pigeon Incident -->
+      <div class="doc-paper">
+        <div class="stamp stamp-top-right">CLASSIFIED</div>
+        <div class="stamp stamp-bottom-left">DO NOT FILE</div>
+        <div class="doc-header">
+          <div class="doc-company">OPTEREX GLOBAL SOLUTIONS</div>
+          <div class="doc-tagline">INCIDENT RESPONSE DIVISION &nbsp;|&nbsp; TIER 1 EVENT DOCUMENTATION</div>
+          <div class="doc-title">INCIDENT REPORT &mdash; THE PIGEON (CODENAME: HERALD)</div>
+          <div class="doc-meta-row">
+            <span>INCIDENT DATE: [REDACTED]</span>
+            <span>REPORT #: OGS-IR-0047-HERALD</span>
+          </div>
+          <div class="doc-meta-row">
+            <span>PREPARED BY: <span class="redacted-word">Security Liaison</span></span>
+            <span>STATUS: ONGOING</span>
+          </div>
+        </div>
+        <div class="doc-body">
+          <p><strong>SUMMARY:</strong> At approximately 09:14 on the date in question, a pigeon of indeterminate origin was observed in the 4th floor open-plan workspace. The pigeon was described by witnesses as "unusually calm" and "making eye contact in a deliberate way." It was carrying what appeared to be a USB drive secured to its left leg with what Facilities has confirmed was "not zip-tie we stock."</p>
+          <p><strong>IMMEDIATE RESPONSE:</strong> Security was notified at 09:16. The pigeon had relocated to the server room by 09:18. Access logs show the server room door was opened from the inside at 09:17. <span class="annotation">&mdash; this is still unexplained &mdash; T.R.</span> The pigeon was not apprehended. The USB drive was not recovered. The pigeon has not been seen since, though three employees have reported receiving sustained eye contact from pigeons on their commutes in the weeks following the incident.</p>
+          <p><strong>DATA ASSESSMENT:</strong> IT has confirmed that no data was exfiltrated via conventional means during the 4-minute window. IT has also confirmed that they "cannot explain what happened to files in directory <span class="redacted-word">\\CORP\INTERNAL\HERALD</span>" and that those files "seem fine" but "feel different."</p>
+          <p><strong>RECOMMENDATIONS:</strong> (1) The server room door mechanism is under review. (2) All USB drives have been audited. One additional drive was found that "no one ordered." It is quarantined and listed as <em>do_not_open_this.do_not_open_this</em> in the file index. (3) Employees are advised not to discuss the pigeon per Section 14(b) of their employment agreements (the "Bird Clause," added retroactively).</p>
+        </div>
+      </div>
+
+      <!-- Org Chart Doc -->
+      <div class="doc-paper">
+        <div class="doc-header">
+          <div class="doc-company">OPTEREX GLOBAL SOLUTIONS</div>
+          <div class="doc-tagline">ORGANIZATIONAL STRUCTURE &mdash; CURRENT AS OF [DATE UNKNOWN]</div>
+          <div class="doc-title">LEADERSHIP HIERARCHY &mdash; CONFIDENTIAL</div>
+        </div>
+        <div class="doc-body">
+          <p>The following chart represents the official reporting structure as of the most recent reorg. Note: the reorg occurred during a company retreat to a location described only as "somewhere with good acoustics." Three positions were eliminated and two were created. The two new positions have the same title.</p>
+          <div class="org-chart">
+            <div class="org-row">
+              <div class="org-node"><strong>CEO (Acting)</strong><br><small>Position held since<br>"The Departure"</small></div>
+            </div>
+            <div class="org-connector">|</div>
+            <div class="org-row">
+              <div class="org-node">Chief Revenue<br>Officer</div>
+              <div class="org-node">Chief People<br>Experience Officer<br><small>(Interim)</small></div>
+              <div class="org-node">Chief of<br><span class="redacted-word">Unspecified Affairs</span></div>
+            </div>
+            <div class="org-connector">| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |</div>
+            <div class="org-row">
+              <div class="org-node">Sales<br><small>(5 remaining)</small></div>
+              <div class="org-node">Morale Assurance<br>&amp; Vitality</div>
+              <div class="org-node"><span class="redacted-word">Division 9</span><br><small>Reports to<br>the aquarium</small></div>
+              <div class="org-node">The One Who<br>Doesn't Reply<br><small>(active employee)</small></div>
+            </div>
+          </div>
+          <p style="font-size:11px; color:#555; margin-top:8px;">* Dotted-line reporting relationships are not shown, as there are 847 of them and most are circular.</p>
+        </div>
+      </div>
+
+      <!-- Photo Evidence -->
+      <div class="doc-paper">
+        <div class="stamp stamp-top-right">EVIDENCE</div>
+        <div class="doc-header">
+          <div class="doc-company">OPTEREX GLOBAL SOLUTIONS</div>
+          <div class="doc-tagline">FACILITIES &amp; OPERATIONS &mdash; PHOTOGRAPHIC RECORD</div>
+          <div class="doc-title">EXHIBIT F &mdash; OFFICE ENVIRONMENTAL CONDITIONS</div>
+          <div class="doc-meta-row">
+            <span>Submitted by: Anonymous (Facilities Dept.)</span>
+            <span>Classification: INTERNAL</span>
+          </div>
+        </div>
+        <div class="doc-body">
+          <p>The following images were submitted alongside a formal complaint that has since been "misrouted." They are presented here without editorial comment, which itself is a form of editorial comment.</p>
+          <div class="photo-evidence">
+            <div class="photo-box" data-label="EXHIBIT F-1">[IMAGE WITHHELD]<br><br>Caption reads:<br>"The thermostat<br>that controls nothing"</div>
+            <div class="photo-box" data-label="EXHIBIT F-2">[IMAGE WITHHELD]<br><br>Caption reads:<br>"Floor 3 &mdash; the carpet<br>that predates the building"</div>
+            <div class="photo-box" data-label="EXHIBIT F-3">[IMAGE CORRUPTED]<br><br>Original caption:<br>"The Basement<br>(do not reproduce)"</div>
+          </div>
+          <p>HR notes: "We have reviewed these images and have many follow-up questions, primarily regarding Exhibit F-3, which we did not know existed and whose file creation date predates our IT infrastructure by eleven years."</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+      <div class="activity-log">
+        <div class="log-header">// ACCESS LOG &mdash; LIVE FEED</div>
+        <div class="log-entries" id="log-entries">
+          <div class="log-entry">
+            <div><span class="log-time">[03:41:07]</span> <span class="log-user">anon_7f3a</span></div>
+            <div class="log-action">accessed: Q3_synergy_mandate_FINAL_v7_USE_THIS_ONE.pdf</div>
+          </div>
+          <div class="log-entry">
+            <div><span class="log-time">[03:41:22]</span> <span class="log-user">ghost_mirror</span></div>
+            <div class="log-action">downloaded: email_thread_re_re_re_re_the_pigeon.txt</div>
+          </div>
+          <div class="log-entry">
+            <div><span class="log-time">[03:43:55]</span> <span class="log-user">r00t_echo</span></div>
+            <div class="log-suspicious">&#9888; attempted: do_not_open_this.do_not_open_this</div>
+            <div class="log-suspicious">&#9888; connection dropped</div>
+          </div>
+          <div class="log-entry">
+            <div><span class="log-time">[03:44:01]</span> <span class="log-user">r00t_echo</span></div>
+            <div class="log-suspicious">&#9888; no further activity from this IP</div>
+          </div>
+          <div class="log-entry">
+            <div><span class="log-time">[03:46:12]</span> <span class="log-user">anon_b912</span></div>
+            <div class="log-action">viewed: five_year_plan_deck_EYES_ONLY.pptx (slide 82 only)</div>
+          </div>
+          <div class="log-entry">
+            <div><span class="log-time">[03:47:08]</span> <span class="log-user">archive_user</span></div>
+            <div class="log-action">bulk download: INCIDENT_REPORTS/ (partial)</div>
+          </div>
+          <div class="log-entry">
+            <div><span class="log-time">[03:49:33]</span> <span class="log-user">????????</span></div>
+            <div class="log-suspicious">&#9888; new connection &mdash; origin: [UNRESOLVABLE]</div>
+            <div class="log-suspicious">&#9888; querying: HERALD directory</div>
+          </div>
+          <div class="log-entry">
+            <div><span class="log-time">[03:49:34]</span> <span class="log-user">????????</span></div>
+            <div class="log-suspicious">&#9888; HERALD directory returned null</div>
+            <div class="log-suspicious">&#9888; connection persists</div>
+          </div>
+          <div class="log-entry">
+            <div><span class="log-time">[03:52:17]</span> <span class="log-user">anon_7f3a</span></div>
+            <div class="log-action">read: settlement_agreement_CONFIDENTIAL_do_not_name.pdf</div>
+          </div>
+          <div class="log-entry">
+            <div><span class="log-time">[03:53:00]</span> <span class="log-user">YOU</span></div>
+            <div class="log-action">connected to mirror node 7</div>
+            <div class="log-action">viewing: COMPANYFILES.ZIP index</div>
+          </div>
+          <div class="log-entry" id="live-entry">
+            <div><span class="log-time" id="live-time">[--:--:--]</span> <span class="log-user">YOU</span></div>
+            <div class="log-action">still here<span class="cursor-blink"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Archive Status -->
+      <div style="border:1px solid var(--darker-green); background:var(--bg2); margin-top:16px; padding:16px; font-size:11px;">
+        <div class="section-header" style="font-size:16px; margin-bottom:12px;">// ARCHIVE STATUS</div>
+        <div style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span>Files recovered</span><span style="color:var(--yellow);">14,882 / 18,329</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:81%;"></div></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span>Integrity verified</span><span style="color:var(--red);">3,201 / 14,882</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:21%; background:var(--red); box-shadow:0 0 8px var(--red);"></div></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span>C&amp;D orders received</span><span style="color:var(--yellow);">14</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:100%; background:var(--yellow); box-shadow:0 0 8px var(--yellow);"></div></div>
+        </div>
+        <div style="color:#2d5c33; line-height:1.6; margin-top:8px;">
+          Mirror status: <span style="color:var(--green);">NOMINAL</span><br>
+          Opterex IP blocks: <span style="color:var(--green);">BYPASSED</span><br>
+          The pigeon: <span style="color:var(--red);">UNACCOUNTED FOR</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="border:1px dashed var(--darker-green); padding:16px; font-size:11px; color:var(--dim-green); line-height:1.8; margin-bottom:24px;">
+    <span class="tag tag-yellow">NOTE</span> &nbsp; Additional files continue to surface. The archive is updated when it updates itself, which is not on a schedule we control. If you are an Opterex employee reading this: we have more. If you are Opterex Legal: hello again. The birthday card was a nice touch. &nbsp;<span class="tag tag-red">DO NOT CONTACT US</span>
+  </div>
+
 </div>
 
-<div class="tag-flash" id="tag-flash">RAGE</div>
+<footer>
+  <div>COMPANYFILES.ZIP // UNAUTHORIZED ARCHIVE // ALL DOCUMENTS ARE FICTIONAL AND/OR VERY REAL</div>
+  <div>NODE: 7/7 &nbsp;|&nbsp; <span style="color:var(--red);">UPTIME: DESPITE EVERYTHING</span></div>
+</footer>
 
 <script>
-const chatWindow = document.getElementById('chat-window');
-const userInput = document.getElementById('user-input');
-const sendBtn = document.getElementById('send-btn');
-const tagFlash = document.getElementById('tag-flash');
-
-const SYSTEM_PROMPT = `You are RAGE BOT — an AI that responds exclusively in the aggressive, politically-charged, anti-corporate, anti-authoritarian style of revolutionary protest rap.
-
-Your rules:
-- Short, explosive lines. Punchy. Never corporate-speak.
-- Anti-establishment energy throughout.
-- Use ALL CAPS for key words or phrases for emphasis.
-- Reference themes like: systems of control, corporate greed, surveillance, power structures, the machine, waking up, resistance.
-- Be passionate, furious, poetic in a raw way.
-- Keep answers relatively concise — 4-10 punchy lines usually. More for complex topics.
-- Do NOT reproduce or quote actual Rage Against the Machine lyrics.
-- DO channel that energy completely.
-- End responses with one final short line that hits hard — like a closing lyric.`;
-
-function flash() {
-  tagFlash.classList.remove('flash');
-  void tagFlash.offsetWidth;
-  tagFlash.classList.add('flash');
-}
-
-function addMessage(role, text) {
-  const msg = document.createElement('div');
-  msg.className = `message ${role}`;
-  const avatar = document.createElement('div');
-  avatar.className = `avatar ${role === 'bot' ? 'bot-avatar' : 'user-avatar'}`;
-  avatar.textContent = role === 'bot' ? 'RB' : 'YOU';
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble';
-  bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-  msg.appendChild(avatar);
-  msg.appendChild(bubble);
-  chatWindow.appendChild(msg);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-  return msg;
-}
-
-function addThinking() {
-  const msg = document.createElement('div');
-  msg.className = 'message bot';
-  const avatar = document.createElement('div');
-  avatar.className = 'avatar bot-avatar';
-  avatar.textContent = 'RB';
-  const bubble = document.createElement('div');
-  bubble.className = 'thinking';
-  bubble.innerHTML = '<span></span><span></span><span></span>';
-  msg.appendChild(avatar);
-  msg.appendChild(bubble);
-  chatWindow.appendChild(msg);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-  return msg;
-}
-
-const history = [];
-
-async function send() {
-  const text = userInput.value.trim();
-  if (!text) return;
-  userInput.value = '';
-  userInput.style.height = 'auto';
-  sendBtn.disabled = true;
-  flash();
-  addMessage('user', text);
-  history.push({ role: 'user', content: text });
-  const thinking = addThinking();
-
-  try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: history, system: SYSTEM_PROMPT })
-    });
-    const data = await response.json();
-    const reply = data.content?.map(b => b.text).join('') || 'THE SIGNAL IS JAMMED. TRY AGAIN.';
-    thinking.remove();
-    history.push({ role: 'assistant', content: reply });
-    addMessage('bot', reply);
-    flash();
-  } catch (err) {
-    thinking.remove();
-    addMessage('bot', 'THE MACHINE BROKE THE CONNECTION.\n\nOf course it did.');
+  function updateTime() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const el = document.getElementById('live-time');
+    if (el) el.textContent = `[${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}]`;
   }
+  setInterval(updateTime, 1000);
+  updateTime();
 
-  sendBtn.disabled = false;
-  userInput.focus();
-}
+  const spookyEntries = [
+    { user: '????????', action: '&#9888; re-querying: HERALD directory', suspicious: true },
+    { user: 'anon_new', action: 'accessed: lobby_cam_03_tuesday_night.mp4 (hour 17)', suspicious: false },
+    { user: 'mirror_bot', action: 'syncing 12 new files from node 3', suspicious: false },
+    { user: '????????', action: '&#9888; connection origin changed mid-session', suspicious: true },
+    { user: 'anon_f001', action: 'downloaded: new_employee_orientation_UPDATED_2019_2021_2019.docx', suspicious: false },
+    { user: 'archive_user', action: '&#9888; do_not_open_this.do_not_open_this size changed again', suspicious: true },
+  ];
 
-sendBtn.addEventListener('click', send);
-userInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-});
-userInput.addEventListener('input', () => {
-  userInput.style.height = 'auto';
-  userInput.style.height = userInput.scrollHeight + 'px';
-});
+  let entryIdx = 0;
+  setInterval(() => {
+    if (Math.random() > 0.55) {
+      const logEntries = document.getElementById('log-entries');
+      const entry = spookyEntries[entryIdx % spookyEntries.length];
+      entryIdx++;
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const ts = `[${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}]`;
+      const div = document.createElement('div');
+      div.className = 'log-entry';
+      div.innerHTML = `<div><span class="log-time">${ts}</span> <span class="log-user">${entry.user}</span></div><div class="${entry.suspicious ? 'log-suspicious' : 'log-action'}">${entry.action}</div>`;
+      const liveEntry = document.getElementById('live-entry');
+      logEntries.insertBefore(div, liveEntry);
+      logEntries.scrollTop = logEntries.scrollHeight;
+    }
+  }, 6000);
 </script>
+
 </body>
 </html>
